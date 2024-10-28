@@ -1,0 +1,7 @@
+services:
+  app:
+    image: suberator
+    ports:
+      - "5000:5000"
+    restart: always  # This makes the container restart automatically
+
