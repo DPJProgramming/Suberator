@@ -1,75 +1,113 @@
-#from flask import Flask, render_template
+from flask import Flask, render_template, request
 import whisper
 import tiktoken
 import subprocess
 import pysubs2
 
-#app = Flask(__name__)
+app = Flask(__name__)
 
-#load model for speech recognition and transcribing 'turbo' or 'large' (all others for whisper are english only)
-model = whisper.load_model("turbo")
+# #testing translating
+# #resultSpanish = model.transcribe(audioPath, task='translate', language='Spanish') 
+# #print(resultSpanish["text"])
 
-#initialize tokeniser
-enc = tiktoken.get_encoding("o200k_base")
-# Test the tokeniser
-#assert enc.decode(enc.encode("hello world")) == "hello world" 
-# get tokeniser corresponding to a specific OpenAI API model
-enc = tiktoken.encoding_for_model("gpt-4o")
+#Home page
+@app.route('/')
+def home():
+    return render_template('index.html')    
 
-#extract audio from video file
-videoPath = "files/video.mp4"
-audioPath = "files/audio.wav"
-ffmpegExtract = ["ffmpeg", "-i", videoPath, "-q:a", "0", "-map", "a", audioPath, "-y"]
-subprocess.run(ffmpegExtract, check=True)
+@app.route('/transcribe', methods=['POST'])
+def transcribe():
+    print("reached transcribe")
+    print()
+    print()
+    print()
 
-#transcribe audio file
-result = model.transcribe(audioPath)
-print(result["text"])
+    #save uploaded file
+    file = request.files['video']
+    videoPath = "files/video.mp4"
+    file.save(videoPath)
 
-#create subtitle file
-subs = pysubs2.SSAFile()
+    #load model for speech recognition and transcribing 'turbo' or 'large' (all others for whisper are english only)
+    model = whisper.load_model("turbo")
 
-for subLine in result["segments"]:
-    #get start and end time of subtitle line
-    start_time = subLine["start"]
-    end_time = subLine["end"]
-    text = subLine["text"]
+    #initialize tokeniser
+    enc = tiktoken.get_encoding("o200k_base")
+    # get tokeniser corresponding to a specific OpenAI API model
+    enc = tiktoken.encoding_for_model("gpt-4o")
 
-    #format and add subtitle line to file
-    line = pysubs2.SSAEvent(start=start_time, end=end_time, text=text) 
-    subs.events.append(line)   
-    print(f"{start_time} --> {end_time} {text}")
+    #extract audio from video file
+    audioPath = "files/audio.wav"
+    ffmpegExtract = ["ffmpeg", "-i", videoPath, "-q:a", "0", "-map", "a", audioPath, "-y"]
+    subprocess.run(ffmpegExtract, check=True)
 
-#save subtitle file
-subs.save("files/subtitles.srt", format_='srt')
+    #transcribe audio file
+    result = model.transcribe(audioPath, word_timestamps=True)
+    #print(result["text"])
 
-#testing translating
-#resultSpanish = model.transcribe(audioPath, task='translate', language='Spanish') 
-#print(resultSpanish["text"])
+    # create subtitle file
+    return createSubs(result, videoPath)
 
-subtitle_file = "files/subtitles.srt"
-output_video = "files/output_video.mp4"
+def createSubs(result, videoPath):
+    print("reached createSubs")
+    print()
+    print()
+    print()
 
-# FFmpeg command to add subtitles
-ffmpeg_command = [
-    "ffmpeg",
-    "-i", videoPath,  # Input video file
-    "-i", subtitle_file,    # Subtitle file
-    "-c:v", "libx264",       # Use libx264 codec for video encoding
-    "-c:a", "copy",          # Copy the audio stream without re-encoding
-    "-vf", f"subtitles={subtitle_file}",  # Apply subtitles filter to burn subtitles into video
-    "-y",                    # Overwrite output file if it exists
-    output_video        # Output video file
-]
+    #create subtitle file 
+    subs = pysubs2.SSAFile()
 
-subprocess.run(ffmpeg_command, check=True)
+    for subLine in result["segments"]:
+        # Iterate through words in the segment (use subLine["words"])
+        for word in subLine["words"]: 
+            wordText = word["word"]
+            wordStart = word["start"]
+            wordEnd = word["end"]
 
+        # Get start and end time of subtitle line
+        start_time = subLine["start"]
+        end_time = subLine["end"]
+        text = subLine["text"]
 
+        # Convert start and end time to milliseconds
+        start_ms = int(start_time * 1500)
+        end_ms = int(end_time * 1500)
 
-# Home page
-# @app.route('/')
-# def home():
-#     return render_template('index.html')    
+        # Format and add subtitle line to file
+        line = pysubs2.SSAEvent(start=start_ms, end=end_ms, text=text) 
+        subs.events.append(line)
 
-# if __name__ == "__main__":
-#      app.run(debug=True)
+    #save subtitle file
+    subs.save("files/subtitles.srt", format_='srt')
+
+    #add subtitles to video
+    return addSubs(videoPath)
+
+def addSubs(videoPath):
+    print("reached add subs")
+    print()
+    print()
+    print()
+
+    subtitle_file = "files/subtitles.srt"
+    output_video = "files/output_video.mp4"
+
+    # FFmpeg command to add subtitles
+    ffmpeg_command = [
+        "ffmpeg",
+        "-i", videoPath,  # Input video file
+        "-i", subtitle_file,    # Subtitle file
+        "-c:v", "libx264",       # Use libx264 codec for video encoding
+        "-c:a", "copy",          # Copy the audio stream without re-encoding
+        "-vf", f"subtitles={subtitle_file}",  # Apply subtitles filter to burn subtitles into video
+        "-y",                    # Overwrite output file if it exists
+        output_video        # Output video file
+    ]
+
+    # Run FFmpeg command
+    subprocess.run(ffmpeg_command, check=True)
+    
+    return "success!"
+    
+
+if __name__ == "__main__":
+     app.run(debug=True)
