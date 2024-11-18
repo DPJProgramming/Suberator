@@ -13,14 +13,15 @@ app = Flask(__name__)
 #Home page
 @app.route('/')
 def home():
-    return render_template('index.html')    
+    #check if process has completed
+    processMessage = request.args.get('message')
+    if processMessage:
+        return render_template('index.html', message = processMessage)   
+    else:
+        return render_template('index.html') 
 
 @app.route('/transcribe', methods=['POST'])
 def transcribe():
-    print("reached transcribe")
-    print()
-    print()
-    print()
 
     #save uploaded file
     file = request.files['video']
@@ -106,8 +107,7 @@ def addSubs(videoPath):
     # Run FFmpeg command
     subprocess.run(ffmpeg_command, check=True)
     
-    return "success!"
-    
+    return render_template('index.html', message="Subtitles added successfully!")
 
 if __name__ == "__main__":
      app.run(debug=True)
