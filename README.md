@@ -33,7 +33,7 @@
 
   - VsCode
   - Flask
-  - Python 3.11.9: https://www.python.org/downloads/release/python-3119/
+  - Python 3.8-3.11: https://www.python.org/downloads/release/python-3119/
   - Whisper by OpenAI: https://github.com/openai/whisper
   - pytorch https://pytorch.org/
   - ffmpeg https://github.com/GyanD/codexffmpeg/releases/tag/2024-10-27-git-bb57b78013
