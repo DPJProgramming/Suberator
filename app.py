@@ -1,14 +1,13 @@
 from flask import Flask, render_template, request
-#import whisper
-#import tiktoken
+import whisper
+import tiktoken
 import subprocess
 import pysubs2
 
 app = Flask(__name__)
 
-# #testing translating
-# #resultSpanish = model.transcribe(audioPath, task='translate', language='Spanish') 
-# #print(resultSpanish["text"])
+enc = tiktoken.get_encoding("o200k_base")
+enc = tiktoken.encoding_for_model("gpt-4o")
 
 #Home page
 @app.route('/')
@@ -31,11 +30,6 @@ def transcribe():
     #load model for speech recognition and transcribing 'turbo' or 'large' (all others for whisper are english only)
     model = whisper.load_model("turbo")
 
-    #initialize tokeniser
-    enc = tiktoken.get_encoding("o200k_base")
-    # get tokeniser corresponding to a specific OpenAI API model
-    enc = tiktoken.encoding_for_model("gpt-4o")
-
     #extract audio from video file
     audioPath = "files/audio.wav"
     ffmpegExtract = ["ffmpeg", "-i", videoPath, "-q:a", "0", "-map", "a", audioPath, "-y"]
@@ -52,54 +46,60 @@ def createSubs(result, videoPath):
     #create subtitle file 
     subs = pysubs2.SSAFile()
 
-    # set limit for words in subtitle line
-    words_per_subtitle = 5
+    #for english language
+    # print("Language")
+    # print(result["language"])
+    # if result["language"] == "English":
+    #     # set limit for words in subtitle line
+    #     words_per_subtitle = 5
 
-    current_words = []
-    current_start = None
+    #     current_words = []
+    #     current_start = None
 
-    for segment in result["segments"]:
-        for word_info in segment["words"]:
-            word = word_info["word"]
-            start_time = word_info["start"]
-            end_time = word_info["end"]
+    #     for segment in result["segments"]:
+    #         for word_info in segment["words"]:
+    #             word = word_info["word"]
+    #             start_time = word_info["start"]
+    #             end_time = word_info["end"]
 
-            # Start a new subtitle line if needed
-            if current_start is None:
-                current_start = start_time
+    #             # Start a new subtitle line if needed
+    #             if current_start is None:
+    #                 current_start = start_time
 
-            current_words.append(word)
+    #             current_words.append(word)
 
-            # If enough words have been accumulated, create a subtitle
-            if len(current_words) >= words_per_subtitle:
-                text = " ".join(current_words)
-                start_ms = int(current_start * 1000)
-                end_ms = int(end_time * 1000)
+    #             # If word limit is reached, create a subtitle
+    #             if len(current_words) >= words_per_subtitle:
+    #                 text = " ".join(current_words)
+    #                 start_ms = int(current_start)
+    #                 end_ms = int(end_time)
 
-                # Add subtitle to file
-                line = pysubs2.SSAEvent(start=start_ms, end=end_ms, text=text)
-                subs.events.append(line)
+    #                 # Add subtitle to file
+    #                 line = pysubs2.SSAEvent(start=start_ms, end=end_ms, text=text)
+    #                 subs.events.append(line)
 
-                # Reset for the next subtitle
-                current_words = []
-                current_start = None
+    #                 # Reset for the next subtitle line
+    #                 current_words = []
+    #                 current_start = None
 
-    # Save the subtitle file
-    subs.save("output.srt")
+    #         # Save the subtitle file
+    #         #subs.save("output.srt")
 
-    # for subLine in result["segments"]:
-    #     # Get start and end time of subtitle line
-    #     start_time = subLine["start"]
-    #     end_time = subLine["end"]
-    #     text = subLine["text"]
+    # # for other languages
+    # else:
+    for subLine in result["segments"]:
+        # Get start and end time of subtitle line
+        start_time = subLine["start"]
+        end_time = subLine["end"]
+        text = subLine["text"]
 
-    #     # Convert start and end time to milliseconds
-    #     # start_ms = int(start_time * 1500)
-    #     # end_ms = int(end_time * 1500)
+        #Convert start and end time to milliseconds
+        start_ms = int(start_time * 100)
+        end_ms = int(end_time * 10)
 
-    #     # Format and add subtitle line to file
-    #     line = pysubs2.SSAEvent(start=start_time, end=end_time, text=text) 
-    #     subs.events.append(line)
+        # Format and add subtitle line to file
+        line = pysubs2.SSAEvent(start=start_ms, end=end_ms, text=text) 
+        subs.events.append(line)
 
     #save subtitle file
     subs.save("files/subtitles.srt", format_='srt')
@@ -108,10 +108,6 @@ def createSubs(result, videoPath):
     return addSubs(videoPath)
 
 def addSubs(videoPath):
-    print("reached add subs")
-    print()
-    print()
-    print()
 
     subtitle_file = "files/subtitles.srt"
     output_video = "files/output_video.mp4"
