@@ -3,18 +3,34 @@
 </br>
 
 
-<h2 align="center"> What is it?</h2>
-Suberator allows a user to upload a video of their choice to automatically transcribe and add subtitles to it. 
+<h1 align="center"> What is it?</h1>
+<h3>Suberator allows a user to upload a video of their choice to automatically transcribe and add subtitles to it. </h3>
+
+<img src="readMe/demo.png" width="50%" align="center">
+
 </br>
 
-<h2 align="center"> Features</h2>
-- convenient and easy to use user interface
-<img src="[https://github.com/DPJProgramming/GitGrubRecipes/blob/master/ReadMeScreenShots/homeScreen.png](https://github.com/DPJProgramming/Suberator/blob/master/readMe/suberatorhomepage.png)" width="75%" align="center">
-<img src="[https://github.com/DPJProgramming/GitGrubRecipes/blob/master/ReadMeScreenShots/homeScreen.png](https://github.com/DPJProgramming/Suberator/blob/master/readMe/suberatordone.png)" width="75%" align="center">
+<h1 align="center"> Features</h1>
+
+- <h2>Convenient and easy to use user interface</h2>
+  
+<img src="readMe/suberatorhomepage.png" width="50%" align="center">
+
+- <h2>Notification when process is complete</h2>
+
+<img src="readMe/suberatordone.png" width="50%" align="center">
+
+- <h2>Supports translation with numerous languages</h2>
+
+<img src="readMe/japanese.png" width="50%" align="center">
+
+- <h2>Outputs subtitle files</h2>
+
+<img src="readMe/subtitles.png" width="50%" align="center">
 
 
+<h1 align="center"> Dependencies</h1>
 
- ## Dependencies
   - VsCode
   - Flask
   - Python 3.11.9: https://www.python.org/downloads/release/python-3119/
@@ -26,11 +42,12 @@ Suberator allows a user to upload a video of their choice to automatically trans
 	  https://github.com/tkarabela/pysubs2?tab=readme-ov-file
   - Windows Operating System
 
-  ## How to run
+<h1 align="center"> How to Run</h1>
+
   - Open a terminal in Vscode
   - Navigate to home directory (where app.py is located)
   - type python app.py
-  - app will run and give you a local host adress to open in browser
+  - app will run and give you a local host address to open in browser
   - After opening that, upload a video from you computer and click suberate
   - Output files will save to files folder
 
