@@ -40,7 +40,6 @@
 	  https://ffmpeg.org/ffmpeg.html
   - pysubs2 https://pysubs2.readthedocs.io/en/latest/
 	  https://github.com/tkarabela/pysubs2?tab=readme-ov-file
-  - Windows Operating System
 
 <h1 align="center"> How to Run</h1>
 
@@ -50,4 +49,11 @@
   - app will run and give you a local host address to open in browser
   - After opening that, upload a video from you computer and click suberate
   - Output files will save to files folder
+
+<h1 align="center"> Limitations</h1>
+
+ - Inconsistent results
+ - Often does not complete transcription of full audio
+ - Translation for some languages often skip or duplicate words
+ - Timecodes do not sync properly
 
